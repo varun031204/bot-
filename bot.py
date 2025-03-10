@@ -8,7 +8,12 @@ import uuid
 TOKEN = "8065946631:AAHXYAFUdyGCtUl6jIh_0cMV-RRVBU3ssO0"
 
 # Initialize Firebase
-cred = credentials.Certificate("xvisaibot-firebase-adminsdk-fbsvc-1d0c5f7d49")
+import json
+import os
+
+firebase_credentials = json.loads(os.getenv("FIREBASE_CREDENTIALS"))
+cred = credentials.Certificate(firebase_credentials)
+
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
