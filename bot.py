@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 import telegram
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Application, CommandHandler, MessageHandler, filters
 import firebase_admin
 from firebase_admin import credentials, firestore
 import uuid
@@ -37,15 +37,18 @@ def handle_message(update, context):
         update.message.reply_text("I didn't understand that.")
 
 # Telegram Bot Setup
-updater = Updater(TOKEN, use_context=True)
-updater.dispatcher.add_handler(CommandHandler("start", start))
-updater.dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_message))
+app_telegram = Application.builder().token(TOKEN).build()
+
+app_telegram.add_handler(CommandHandler("start", start))
+app_telegram.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
 @app.route('/webhook', methods=['POST'])
 def webhook():
     update = telegram.Update.de_json(request.get_json(), bot)
-    updater.dispatcher.process_update(update)
+    app_telegram.update_queue.put(update)
     return "OK"
+
+
 
 if __name__ == "__main__":
     app.run(port=5000)
